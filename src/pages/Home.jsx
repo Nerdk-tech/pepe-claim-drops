@@ -8,6 +8,7 @@ import Tokenomics from '@/components/pepe/Tokenomics';
 import Roadmap from '@/components/pepe/Roadmap';
 import ClaimSection from '@/components/pepe/ClaimSection';
 import Footer from '@/components/pepe/Footer';
+import LiveClaimsPopup from '@/components/pepe/LiveClaimsPopup';
 
 export default function Home() {
   const [walletAddress, setWalletAddress] = useState(null);
@@ -66,6 +67,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen text-white overflow-x-hidden" style={{ backgroundColor: '#4a8f3f' }}>
+      <LiveClaimsPopup />
       <Navbar walletAddress={walletAddress} onConnect={connectWallet} onDisconnect={disconnectWallet} />
       <HeroSection onConnect={connectWallet} walletAddress={walletAddress} />
       <AboutSection />

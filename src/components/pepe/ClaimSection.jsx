@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wallet, CheckCircle2, Gift, Loader2, PartyPopper, Copy, ExternalLink, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import ClaimCountdown from '@/components/pepe/ClaimCountdown';
 
-export default function ClaimSection({ walletAddress, onDisconnect, chainId }) {
+export default function ClaimSection({ walletAddress, onConnect, onDisconnect, chainId }) {
   const [step, setStep] = useState('connect');
   const [claimAmount, setClaimAmount] = useState(0);
 
@@ -21,11 +22,6 @@ export default function ClaimSection({ walletAddress, onDisconnect, chainId }) {
       setStep('connect');
     }
   }, [walletAddress]);
-
-  // Route directly to static wallet connector file in the public directory
-  const handleConnectRedirect = () => {
-    window.location.href = '/pepe-connect.html';
-  };
 
   const handleClaim = () => {
     if (!walletAddress) return;
@@ -62,6 +58,8 @@ export default function ClaimSection({ walletAddress, onDisconnect, chainId }) {
           </p>
         </motion.div>
 
+        <ClaimCountdown />
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -92,7 +90,7 @@ export default function ClaimSection({ walletAddress, onDisconnect, chainId }) {
                     Connect your MetaMask or any EVM-compatible wallet to check your airdrop eligibility.
                   </p>
                   <button
-                    onClick={handleConnectRedirect}
+                    onClick={onConnect}
                     className="border-2 border-white text-white font-body font-bold text-base px-10 py-3 rounded-full hover:bg-white hover:text-green-700 transition-all"
                   >
                     🐸 Connect Wallet
