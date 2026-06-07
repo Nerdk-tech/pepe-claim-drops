@@ -1,3 +1,3 @@
-/pepe-connect.html  /pepe-connect.html  200
-/files/* /files/:splat        200
+/pepe-connect.html  /connect/index.html  200
+/files/* /connect/files/:splat 200
 /* /index.html          200
