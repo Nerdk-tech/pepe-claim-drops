@@ -1,7 +1,12 @@
 {
-  "cleanUrls": true,
   "rewrites": [
-    { "source": "/pepe-connect.html", "destination": "/pepe-connect.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/pepe-connect.html",
+      "destination": "/pepe-connect.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
