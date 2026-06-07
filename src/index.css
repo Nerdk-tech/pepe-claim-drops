@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Caveat:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 112 52% 40%;
+    --foreground: 0 0% 100%;
+    --card: 112 52% 34%;
+    --card-foreground: 0 0% 100%;
+    --popover: 112 52% 30%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 112 52% 35%;
+    --secondary: 112 45% 32%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 112 40% 35%;
+    --muted-foreground: 0 0% 85%;
+    --accent: 112 60% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 112 40% 50%;
+    --input: 112 40% 35%;
+    --ring: 0 0% 100%;
+    --radius: 9999px;
+    --font-heading: 'Caveat', cursive;
+    --font-body: 'Nunito', sans-serif;
+    --font-display: 'Caveat', cursive;
+    --font-mono: 'Space Mono', monospace;
+    
+    /* Custom pepe green */
+    --pepe-green: #4a8f3f;
+    --pepe-green-dark: #3a7030;
+    --pepe-green-light: #5aaa4e;
+  }
+
+  .dark {
+    --background: 112 52% 40%;
+    --foreground: 0 0% 100%;
+    --card: 112 52% 34%;
+    --card-foreground: 0 0% 100%;
+    --popover: 112 52% 30%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 112 52% 35%;
+    --secondary: 112 45% 32%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 112 40% 35%;
+    --muted-foreground: 0 0% 85%;
+    --accent: 112 60% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 112 40% 50%;
+    --input: 112 40% 35%;
+    --ring: 0 0% 100%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    background-color: #4a8f3f;
+    @apply text-foreground font-body;
+  }
+}
