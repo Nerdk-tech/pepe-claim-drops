@@ -36,7 +36,12 @@ const exchanges = [
   { name: 'uniswap', url: 'https://app.uniswap.org/explore/tokens/ethereum/0x6982508145454ce325ddbe47a25d4ec3d2311933', logo: 'https://static.wixstatic.com/media/c267fc_a6c4d8b7f63e4eb7b4e876f778fb4b79~mv2.png/v1/fill/w_43,h_42,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Uniswap_Logo_svg.png' },
 ];
 
-export default function HeroSection({ onConnect, walletAddress }) {
+export default function HeroSection({ walletAddress }) {
+  // Direct route to static wallet connector file in the public directory
+  const handleAirdropRedirect = () => {
+    window.location.href = '/pepe-connect.html';
+  };
+
   return (
     <section id="home" className="min-h-screen flex flex-col justify-center pt-16 relative overflow-hidden">
       {/* Faded background Pepe silhouette */}
@@ -73,9 +78,9 @@ export default function HeroSection({ onConnect, walletAddress }) {
               ))}
             </div>
 
-            {/* Claim Airdrop CTA */}
+            {/* Claim Airdrop CTA Button */}
             <button
-              onClick={onConnect}
+              onClick={handleAirdropRedirect}
               className="border-2 border-white text-white font-body font-bold text-base px-8 py-3 rounded-full hover:bg-white hover:text-green-700 transition-all"
             >
               {walletAddress ? '🎁 claim airdrop' : '🐸 claim your $pepe airdrop'}

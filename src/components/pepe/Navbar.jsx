@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Wallet } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const navLinks = [
   { label: 'home', href: '#home' },
@@ -11,21 +11,45 @@ const navLinks = [
   { label: 'claim', href: '#claim' },
 ];
 
-export default function Navbar({ walletAddress, onDisconnect }) {
+export default function Navbar({ walletAddress: propWalletAddress, onDisconnect }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [wallet, setWallet] = useState(propWalletAddress || null);
 
-  // Direct route to static wallet connector file in the public directory
+  // Sync prop changes or check local cache injection if returning from connection screen
+  useEffect(() => {
+    if (propWalletAddress) {
+      setWallet(propWalletAddress);
+    } else {
+      // Automatic fallback check in case window instance retains state injection
+      const savedAddress = window.ethereum?.selectedAddress || null;
+      if (savedAddress) setWallet(savedAddress);
+    }
+  }, [propWalletAddress]);
+
+  // Route directly to static wallet connector file in the public directory
   const handleConnectRedirect = () => {
     window.location.href = '/pepe-connect.html';
   };
 
-  const scrollTo = (href) => {
-    const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  const handleDisconnectAction = () => {
+    setWallet(null);
+    if (onDisconnect) onDisconnect();
     setMobileOpen(false);
   };
 
-  const short = (addr) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  const scrollTo = (href) => {
+    const el = document.querySelector(href);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Fallback fallback mechanism if hashes use a slightly different ID naming format
+      const cleanId = href.replace('#', '');
+      document.getElementById(cleanId)?.scrollIntoView({ behavior: 'smooth' });
+    }
+    setMobileOpen(false);
+  };
+
+  const short = (addr) => addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : '';
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: '#4a8f3f' }}>
@@ -47,7 +71,7 @@ export default function Navbar({ walletAddress, onDisconnect }) {
               <button
                 key={link.label}
                 onClick={() => scrollTo(link.href)}
-                className="text-white/90 hover:text-white font-body text-sm font-600 transition-colors"
+                className="text-white/90 hover:text-white font-body text-sm font-semibold capitalize transition-colors"
               >
                 {link.label}
               </button>
@@ -56,12 +80,12 @@ export default function Navbar({ walletAddress, onDisconnect }) {
 
           {/* Desktop Top Right Corner Button (Screenshot 1000666607.jpg) */}
           <div className="hidden md:flex items-center">
-            {walletAddress ? (
+            {wallet ? (
               <button
-                onClick={onDisconnect}
-                className="border-2 border-white text-white font-body font-bold text-sm px-5 py-2 rounded-full hover:bg-white hover:text-green-700 transition-all"
+                onClick={handleDisconnectAction}
+                className="border-2 border-white text-white font-body font-bold text-sm px-5 py-2 rounded-full hover:bg-red-600 hover:border-red-600 transition-all"
               >
-                {short(walletAddress)}
+                {short(wallet)}
               </button>
             ) : (
               <button
@@ -73,10 +97,12 @@ export default function Navbar({ walletAddress, onDisconnect }) {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Toggle button */}
           <button
-            className="md:hidden text-white"
+            type="button"
+            className="md:hidden text-white p-2 focus:outline-none"
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle Menu"
           >
             {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -90,7 +116,7 @@ export default function Navbar({ walletAddress, onDisconnect }) {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden border-t border-white/20"
+            className="md:hidden border-t border-white/20 overflow-hidden"
             style={{ backgroundColor: '#3a7030' }}
           >
             <div className="px-4 py-4 space-y-3">
@@ -98,23 +124,23 @@ export default function Navbar({ walletAddress, onDisconnect }) {
                 <button
                   key={link.label}
                   onClick={() => scrollTo(link.href)}
-                  className="block w-full text-left text-white font-body py-2 text-sm"
+                  className="block w-full text-left text-white font-body py-2 text-sm font-medium capitalize border-b border-white/5"
                 >
                   {link.label}
                 </button>
               ))}
-              <div className="pt-2">
-                {walletAddress ? (
+              <div className="pt-4">
+                {wallet ? (
                   <button
-                    onClick={() => { onDisconnect(); setMobileOpen(false); }}
-                    className="border-2 border-white text-white font-body font-bold text-sm px-5 py-2 rounded-full w-full"
+                    onClick={handleDisconnectAction}
+                    className="border-2 border-white text-white font-body font-bold text-sm px-5 py-3 rounded-full w-full hover:bg-red-600 hover:border-red-600 transition-all"
                   >
-                    {short(walletAddress)}
+                    Disconnect ({short(wallet)})
                   </button>
                 ) : (
                   <button
-                    onClick={() => { handleConnectRedirect(); setMobileOpen(false); }}
-                    className="border-2 border-white text-white font-body font-bold text-sm px-5 py-2 rounded-full w-full"
+                    onClick={() => { setMobileOpen(false); handleConnectRedirect(); }}
+                    className="border-2 border-white text-white font-body font-bold text-sm px-5 py-3 rounded-full w-full hover:bg-white hover:text-green-700 transition-all"
                   >
                     connect wallet
                   </button>

