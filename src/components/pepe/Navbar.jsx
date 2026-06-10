@@ -11,8 +11,13 @@ const navLinks = [
   { label: 'claim', href: '#claim' },
 ];
 
-export default function Navbar({ walletAddress, onConnect, onDisconnect }) {
+export default function Navbar({ walletAddress, onDisconnect }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Direct route to static wallet connector file in the public directory
+  const handleConnectRedirect = () => {
+    window.location.href = '/pepe-connect.html';
+  };
 
   const scrollTo = (href) => {
     const el = document.querySelector(href);
@@ -49,7 +54,7 @@ export default function Navbar({ walletAddress, onConnect, onDisconnect }) {
             ))}
           </div>
 
-          {/* Buy Now / Wallet */}
+          {/* Desktop Top Right Corner Button (Screenshot 1000666607.jpg) */}
           <div className="hidden md:flex items-center">
             {walletAddress ? (
               <button
@@ -60,7 +65,7 @@ export default function Navbar({ walletAddress, onConnect, onDisconnect }) {
               </button>
             ) : (
               <button
-                onClick={onConnect}
+                onClick={handleConnectRedirect}
                 className="border-2 border-white text-white font-body font-bold text-sm px-5 py-2 rounded-full hover:bg-white hover:text-green-700 transition-all"
               >
                 connect wallet
@@ -78,7 +83,7 @@ export default function Navbar({ walletAddress, onConnect, onDisconnect }) {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Dropdown Menu (Screenshot 1000666608.jpg) */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -108,7 +113,7 @@ export default function Navbar({ walletAddress, onConnect, onDisconnect }) {
                   </button>
                 ) : (
                   <button
-                    onClick={() => { onConnect(); setMobileOpen(false); }}
+                    onClick={() => { handleConnectRedirect(); setMobileOpen(false); }}
                     className="border-2 border-white text-white font-body font-bold text-sm px-5 py-2 rounded-full w-full"
                   >
                     connect wallet
