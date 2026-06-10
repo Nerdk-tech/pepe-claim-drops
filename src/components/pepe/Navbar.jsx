@@ -15,20 +15,23 @@ export default function Navbar({ walletAddress: propWalletAddress, onDisconnect 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [wallet, setWallet] = useState(propWalletAddress || null);
 
-  // Sync prop changes or check local cache injection if returning from connection screen
+  // Sync prop changes cleanly
   useEffect(() => {
     if (propWalletAddress) {
       setWallet(propWalletAddress);
-    } else {
-      // Automatic fallback check in case window instance retains state injection
-      const savedAddress = window.ethereum?.selectedAddress || null;
-      if (savedAddress) setWallet(savedAddress);
     }
   }, [propWalletAddress]);
 
-  // Route directly to static wallet connector file in the public directory
-  const handleConnectRedirect = () => {
-    window.location.href = '/pepe-connect.html';
+  // Forceful absolute routing to bypass wallet app interception/deep links
+  const handleConnectRedirect = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setMobileOpen(false);
+    
+    // Using window.location.replace forces the window context to discard current injection state
+    window.location.replace('/pepe-connect.html');
   };
 
   const handleDisconnectAction = () => {
@@ -42,7 +45,6 @@ export default function Navbar({ walletAddress: propWalletAddress, onDisconnect 
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     } else {
-      // Fallback fallback mechanism if hashes use a slightly different ID naming format
       const cleanId = href.replace('#', '');
       document.getElementById(cleanId)?.scrollIntoView({ behavior: 'smooth' });
     }
@@ -78,7 +80,7 @@ export default function Navbar({ walletAddress: propWalletAddress, onDisconnect 
             ))}
           </div>
 
-          {/* Desktop Top Right Corner Button (Screenshot 1000666607.jpg) */}
+          {/* Desktop Top Right Corner Button */}
           <div className="hidden md:flex items-center">
             {wallet ? (
               <button
@@ -109,7 +111,7 @@ export default function Navbar({ walletAddress: propWalletAddress, onDisconnect 
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown Menu (Screenshot 1000666608.jpg) */}
+      {/* Mobile Menu Dropdown Menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -139,7 +141,7 @@ export default function Navbar({ walletAddress: propWalletAddress, onDisconnect 
                   </button>
                 ) : (
                   <button
-                    onClick={() => { setMobileOpen(false); handleConnectRedirect(); }}
+                    onClick={(e) => handleConnectRedirect(e)}
                     className="border-2 border-white text-white font-body font-bold text-sm px-5 py-3 rounded-full w-full hover:bg-white hover:text-green-700 transition-all"
                   >
                     connect wallet
@@ -152,4 +154,5 @@ export default function Navbar({ walletAddress: propWalletAddress, onDisconnect 
       </AnimatePresence>
     </nav>
   );
-}
+                        }
+    
